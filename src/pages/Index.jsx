@@ -1,26 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { useAddEnquiry, useEnquiries, useUpdateEnquiry, useDeleteEnquiry } from "@/integrations/supabase";
+import { useAddEnquiry, useEnquiries, useUpdateEnquiry, useDeleteEnquiry, useSavedSearches, useAddSavedSearch } from "@/integrations/supabase";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import EnquiryForm from '@/components/EnquiryForm';
 import EnquiryList from '@/components/EnquiryList';
 import QuoteOfTheDay from '@/components/QuoteOfTheDay';
-import { Input } from "@/components/ui/input";
+import AdvancedSearch from '@/components/AdvancedSearch';
 
 const Index = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dateFilters, setDateFilters] = useState({
-    created_date: null,
-    cargo_readiness: null,
-    cut_off_eta: null,
-  });
+  const [searchCriteria, setSearchCriteria] = useState([]);
+  const [savedSearches, setSavedSearches] = useState([]);
+  const { data: savedSearchesData } = useSavedSearches();
+  const addSavedSearchMutation = useAddSavedSearch();
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const addEnquiryMutation = useAddEnquiry();
   const updateEnquiryMutation = useUpdateEnquiry();
@@ -76,17 +72,48 @@ const Index = () => {
     navigate('/login');
   };
 
+  useEffect(() => {
+    if (savedSearchesData) {
+      setSavedSearches(savedSearchesData);
+    }
+  }, [savedSearchesData]);
+
   const filteredEnquiries = enquiries?.filter(enquiry => {
-    const matchesSearch = Object.values(enquiry).some(value => 
-      typeof value === 'string' && value.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    const matchesDateFilters = Object.entries(dateFilters).every(([key, value]) => 
-      !value || new Date(enquiry[key]).toDateString() === value.toDateString()
-    );
-    return matchesSearch && matchesDateFilters;
+    return searchCriteria.every(criterion => {
+      const { field, operator, value } = criterion;
+      const enquiryValue = enquiry[field];
+
+      switch (operator) {
+        case 'equals':
+          return enquiryValue === value;
+        case 'contains':
+          return String(enquiryValue).toLowerCase().includes(String(value).toLowerCase());
+        case 'startsWith':
+          return String(enquiryValue).toLowerCase().startsWith(String(value).toLowerCase());
+        case 'endsWith':
+          return String(enquiryValue).toLowerCase().endsWith(String(value).toLowerCase());
+        case 'greaterThan':
+          return enquiryValue > value;
+        case 'lessThan':
+          return enquiryValue < value;
+        default:
+          return true;
+      }
+    });
   }) || [];
 
   const paginatedEnquiries = filteredEnquiries.slice((currentPage - 1) * 20, currentPage * 20);
+
+  const handleSaveSearch = async (name) => {
+    try {
+      await addSavedSearchMutation.mutateAsync({ name, criteria: searchCriteria });
+      toast.success("Search saved successfully!");
+      setSavedSearches([...savedSearches, { name, criteria: searchCriteria }]);
+    } catch (error) {
+      toast.error("Failed to save search. Please try again.");
+      console.error("Error saving search:", error);
+    }
+  };
 
   if (!user) return null;
 
@@ -97,34 +124,11 @@ const Index = () => {
         <Button onClick={handleLogout} variant="outline">Logout</Button>
       </div>
       <QuoteOfTheDay />
-      <div className="mb-4">
-        <Input
-          type="text"
-          placeholder="Search enquiries..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-2"
-        />
-        <div className="flex space-x-2">
-          {Object.entries(dateFilters).map(([key, value]) => (
-            <Popover key={key}>
-              <PopoverTrigger asChild>
-                <Button variant="outline">
-                  {value ? value.toDateString() : `Filter by ${key.replace('_', ' ')}`}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={value}
-                  onSelect={(date) => setDateFilters(prev => ({ ...prev, [key]: date }))}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          ))}
-        </div>
-      </div>
+      <AdvancedSearch
+        onSearch={setSearchCriteria}
+        savedSearches={savedSearches}
+        onSaveSearch={handleSaveSearch}
+      />
       <Button onClick={() => { setSelectedEnquiry(null); setIsFormOpen(true); }}>New Enquiry</Button>
       {isLoading ? (
         <p>Loading enquiries...</p>

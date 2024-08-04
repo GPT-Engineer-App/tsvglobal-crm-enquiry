@@ -263,3 +263,19 @@ export const useDeleteEnquiry = () => {
         },
     });
 };
+
+// Saved Searches Hooks
+export const useSavedSearches = () => useQuery({
+    queryKey: ['savedSearches'],
+    queryFn: () => fromSupabase(supabase.from('saved_searches').select('*'))
+});
+
+export const useAddSavedSearch = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (newSavedSearch) => fromSupabase(supabase.from('saved_searches').insert([newSavedSearch])),
+        onSuccess: () => {
+            queryClient.invalidateQueries('savedSearches');
+        },
+    });
+};
