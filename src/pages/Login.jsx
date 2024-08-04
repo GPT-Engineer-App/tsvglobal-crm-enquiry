@@ -23,9 +23,9 @@ const Login = () => {
 
       if (error) throw error;
 
-      if (data && data.user_type) {
-        const userTypes = Array.isArray(data.user_type) ? data.user_type : [data.user_type];
-        if (userTypes.includes('Enquiry')) {
+      if (data && data.application_name) {
+        const applicationNames = Array.isArray(data.application_name) ? data.application_name : [data.application_name];
+        if (applicationNames.includes('Enquiry')) {
           // Store user info in localStorage or context
           localStorage.setItem('user', JSON.stringify(data));
           toast.success("Login successful!");
