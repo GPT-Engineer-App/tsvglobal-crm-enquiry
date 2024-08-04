@@ -55,15 +55,21 @@ const EnquiryForm = ({ onSubmit, onCancel }) => {
       origin_port: "",
       destination_country: "",
       destination_port: "",
-      length: 0,
-      breadth: 0,
-      height: 0,
+      length: "",
+      breadth: "",
+      height: "",
       unit_of_measurement: "",
       package_type: "",
-      no_of_pkgs: 0,
-      gross_weight: 0,
+      no_of_pkgs: "",
+      net_weight: "",
+      gross_weight: "",
       equipment: "",
+      no_of_units: "",
       commodity: "",
+      cargo_readiness: "",
+      cut_off_eta: "",
+      indication_in_usd: "",
+      remarks: "",
     },
   });
 
@@ -250,7 +256,11 @@ const EnquiryForm = ({ onSubmit, onCancel }) => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Length</FormLabel>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value))} />
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value === "" ? "" : parseFloat(e.target.value))}
+                        />
                         <FormMessage />
                       </FormItem>
                     )}
