@@ -7,25 +7,27 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
+      const { data, error } = await supabase
+        .from('user_table')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
       if (error) throw error;
 
-      if (data.user) {
+      if (data && data.password === password) {
+        localStorage.setItem('user', JSON.stringify(data));
         toast.success("Login successful!");
         navigate('/');
       } else {
-        toast.error("Invalid user data.");
+        toast.error("Invalid credentials.");
       }
     } catch (error) {
       toast.error("Login failed. Please check your credentials.");
@@ -43,10 +45,10 @@ const Login = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="User ID"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
                 required
               />
             </div>
