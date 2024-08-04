@@ -1,12 +1,12 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Edit, Trash2 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const EnquiryList = ({ enquiries, onEdit, onDelete, currentPage, totalPages, onPageChange }) => {
   return (
-    <div>
-      <ScrollArea className="h-[600px]">
+    <div className="relative">
+      <ScrollArea className="h-[600px] w-full overflow-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -74,6 +74,8 @@ const EnquiryList = ({ enquiries, onEdit, onDelete, currentPage, totalPages, onP
             ))}
           </TableBody>
         </Table>
+        <ScrollBar orientation="horizontal" />
+        <ScrollBar orientation="vertical" />
       </ScrollArea>
       <div className="flex justify-center items-center mt-4">
         <Button
