@@ -9,7 +9,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
+      <Toaster richColors />
       <BrowserRouter>
         <Routes>
           {navItems.map(({ to, page }) => (
