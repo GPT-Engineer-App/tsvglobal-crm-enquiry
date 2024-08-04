@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+export { SupabaseProvider } from './auth';
 import { useQuery, useMutation, useQueryClient, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect } from "react";
 

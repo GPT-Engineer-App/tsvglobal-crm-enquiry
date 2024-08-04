@@ -6,7 +6,7 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 
 const SupabaseAuthContext = createContext();
 
-export const SupabaseAuthProvider = ({ children }) => {
+export const SupabaseProvider = ({ children }) => {
   return (
     <SupabaseProvider>
       <SupabaseAuthProviderInner>
