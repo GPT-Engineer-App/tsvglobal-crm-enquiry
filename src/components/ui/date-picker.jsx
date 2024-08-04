@@ -41,7 +41,6 @@ export function DatePickerDemo() {
 }
 "use client"
 
-import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -52,6 +51,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { format } from "date-fns"
 
 export function DatePicker({
   selected,
