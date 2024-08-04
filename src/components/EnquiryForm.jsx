@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const formSchema = z.object({
   // User Input Fields
+  enquiry_id: z.string().min(1, "Enquiry ID is required"),
   channel: z.string().min(1, "Channel is required"),
   enquiry_mode: z.string().min(1, "Enquiry mode is required"),
   enquiry_type: z.string().min(1, "Enquiry type is required"),
@@ -43,6 +44,7 @@ const EnquiryForm = ({ onSubmit, onCancel }) => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      enquiry_id: "",
       channel: "",
       enquiry_mode: "",
       enquiry_type: "",
@@ -94,6 +96,17 @@ const EnquiryForm = ({ onSubmit, onCancel }) => {
                   <CardTitle>Enquiry Details</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="enquiry_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Enquiry ID</FormLabel>
+                        <Input {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="channel"
