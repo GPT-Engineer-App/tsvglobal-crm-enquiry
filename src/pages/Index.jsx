@@ -16,6 +16,7 @@ const Index = () => {
       setIsFormOpen(false);
     } catch (error) {
       toast.error("Failed to create enquiry. Please try again.");
+      console.error("Error creating enquiry:", error);
     }
   };
 
