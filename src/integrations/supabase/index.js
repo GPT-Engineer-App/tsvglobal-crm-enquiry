@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_PROJECT_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_API_KEY;
@@ -9,11 +9,9 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const queryClient = new QueryClient();
 
-export const SupabaseProvider = ({ children }) => (
-  <QueryClientProvider client={queryClient}>
-    {children}
-  </QueryClientProvider>
-);
+export const SupabaseProvider = ({ children }) => {
+  return React.createElement(QueryClientProvider, { client: queryClient }, children);
+};
 
 export const useSupabaseSession = () => {
     const [session, setSession] = useState(null);
