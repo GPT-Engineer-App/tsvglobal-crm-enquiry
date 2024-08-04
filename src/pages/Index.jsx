@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { useAddEnquiry, useEnquiries, useUpdateEnquiry, useDeleteEnquiry } from "@/integrations/supabase";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import EnquiryForm from '@/components/EnquiryForm';
 import EnquiryList from '@/components/EnquiryList';
 import QuoteOfTheDay from '@/components/QuoteOfTheDay';
 import { Input } from "@/components/ui/input";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -107,21 +108,23 @@ const Index = () => {
           className="mb-2"
         />
         <div className="flex space-x-2">
-          <DatePicker
-            selected={dateFilters.created_date}
-            onChange={(date) => setDateFilters(prev => ({ ...prev, created_date: date }))}
-            placeholderText="Filter by created date"
-          />
-          <DatePicker
-            selected={dateFilters.cargo_readiness}
-            onChange={(date) => setDateFilters(prev => ({ ...prev, cargo_readiness: date }))}
-            placeholderText="Filter by cargo readiness"
-          />
-          <DatePicker
-            selected={dateFilters.cut_off_eta}
-            onChange={(date) => setDateFilters(prev => ({ ...prev, cut_off_eta: date }))}
-            placeholderText="Filter by cut-off ETA"
-          />
+          {Object.entries(dateFilters).map(([key, value]) => (
+            <Popover key={key}>
+              <PopoverTrigger asChild>
+                <Button variant="outline">
+                  {value ? value.toDateString() : `Filter by ${key.replace('_', ' ')}`}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={value}
+                  onSelect={(date) => setDateFilters(prev => ({ ...prev, [key]: date }))}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          ))}
         </div>
       </div>
       <Button onClick={() => { setSelectedEnquiry(null); setIsFormOpen(true); }}>New Enquiry</Button>
