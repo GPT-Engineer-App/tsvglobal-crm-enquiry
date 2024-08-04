@@ -7,11 +7,14 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_API_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-export const queryClient = new QueryClient();
-
-export const SupabaseProvider = ({ children }) => {
-  return React.createElement(QueryClientProvider, { client: queryClient }, children);
-};
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export const useSupabaseSession = () => {
     const [session, setSession] = useState(null);

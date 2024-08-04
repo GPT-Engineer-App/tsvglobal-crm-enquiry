@@ -8,10 +8,10 @@ import { queryClient } from "./integrations/supabase";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <SupabaseAuthProvider>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <SupabaseAuthProvider>
         <App />
-      </QueryClientProvider>
-    </SupabaseAuthProvider>
+      </SupabaseAuthProvider>
+    </QueryClientProvider>
   </React.StrictMode>,
 );
