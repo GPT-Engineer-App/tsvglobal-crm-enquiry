@@ -106,7 +106,11 @@ const Index = () => {
 
   const handleSaveSearch = async (name) => {
     try {
-      await addSavedSearchMutation.mutateAsync({ name, criteria: searchCriteria });
+      await addSavedSearchMutation.mutateAsync({ 
+        name, 
+        criteria: searchCriteria,
+        application_name: 'Enquiry' // Add this line
+      });
       toast.success("Search saved successfully!");
       setSavedSearches([...savedSearches, { name, criteria: searchCriteria }]);
     } catch (error) {
