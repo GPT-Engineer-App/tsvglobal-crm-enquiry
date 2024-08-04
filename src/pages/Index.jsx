@@ -1,15 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { useAddEnquiry } from "@/integrations/supabase";
+import { useAddEnquiry, useEnquiries, useUpdateEnquiry, useDeleteEnquiry } from "@/integrations/supabase";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import EnquiryForm from '@/components/EnquiryForm';
+import EnquiryList from '@/components/EnquiryList';
+import QuoteOfTheDay from '@/components/QuoteOfTheDay';
+import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 
 const Index = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateFilters, setDateFilters] = useState({
+    created_date: null,
+    cargo_readiness: null,
+    cut_off_eta: null,
+  });
+  const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const addEnquiryMutation = useAddEnquiry();
+  const updateEnquiryMutation = useUpdateEnquiry();
+  const deleteEnquiryMutation = useDeleteEnquiry();
+  const { data: enquiries, isLoading, isError } = useEnquiries();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,12 +38,35 @@ const Index = () => {
 
   const handleSubmit = async (data) => {
     try {
-      await addEnquiryMutation.mutateAsync(data);
-      toast.success("Enquiry created successfully!");
+      if (selectedEnquiry) {
+        await updateEnquiryMutation.mutateAsync({ id: selectedEnquiry.id, ...data });
+        toast.success("Enquiry updated successfully!");
+      } else {
+        await addEnquiryMutation.mutateAsync(data);
+        toast.success("Enquiry created successfully!");
+      }
       setIsFormOpen(false);
+      setSelectedEnquiry(null);
     } catch (error) {
-      toast.error("Failed to create enquiry. Please try again.");
-      console.error("Error creating enquiry:", error);
+      toast.error(`Failed to ${selectedEnquiry ? 'update' : 'create'} enquiry. Please try again.`);
+      console.error(`Error ${selectedEnquiry ? 'updating' : 'creating'} enquiry:`, error);
+    }
+  };
+
+  const handleEdit = (enquiry) => {
+    setSelectedEnquiry(enquiry);
+    setIsFormOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this enquiry?")) {
+      try {
+        await deleteEnquiryMutation.mutateAsync(id);
+        toast.success("Enquiry deleted successfully!");
+      } catch (error) {
+        toast.error("Failed to delete enquiry. Please try again.");
+        console.error("Error deleting enquiry:", error);
+      }
     }
   };
 
@@ -36,6 +74,18 @@ const Index = () => {
     localStorage.removeItem('user');
     navigate('/login');
   };
+
+  const filteredEnquiries = enquiries?.filter(enquiry => {
+    const matchesSearch = Object.values(enquiry).some(value => 
+      typeof value === 'string' && value.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const matchesDateFilters = Object.entries(dateFilters).every(([key, value]) => 
+      !value || new Date(enquiry[key]).toDateString() === value.toDateString()
+    );
+    return matchesSearch && matchesDateFilters;
+  }) || [];
+
+  const paginatedEnquiries = filteredEnquiries.slice((currentPage - 1) * 20, currentPage * 20);
 
   if (!user) return null;
 
@@ -45,11 +95,53 @@ const Index = () => {
         <h1 className="text-2xl font-bold">Enquiries</h1>
         <Button onClick={handleLogout} variant="outline">Logout</Button>
       </div>
-      <Button onClick={() => setIsFormOpen(true)}>New Enquiry</Button>
+      <QuoteOfTheDay />
+      <div className="mb-4">
+        <Input
+          type="text"
+          placeholder="Search enquiries..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="mb-2"
+        />
+        <div className="flex space-x-2">
+          <DatePicker
+            selected={dateFilters.created_date}
+            onChange={(date) => setDateFilters(prev => ({ ...prev, created_date: date }))}
+            placeholderText="Filter by created date"
+          />
+          <DatePicker
+            selected={dateFilters.cargo_readiness}
+            onChange={(date) => setDateFilters(prev => ({ ...prev, cargo_readiness: date }))}
+            placeholderText="Filter by cargo readiness"
+          />
+          <DatePicker
+            selected={dateFilters.cut_off_eta}
+            onChange={(date) => setDateFilters(prev => ({ ...prev, cut_off_eta: date }))}
+            placeholderText="Filter by cut-off ETA"
+          />
+        </div>
+      </div>
+      <Button onClick={() => { setSelectedEnquiry(null); setIsFormOpen(true); }}>New Enquiry</Button>
+      {isLoading ? (
+        <p>Loading enquiries...</p>
+      ) : isError ? (
+        <p>Error loading enquiries. Please try again.</p>
+      ) : (
+        <EnquiryList
+          enquiries={paginatedEnquiries}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredEnquiries.length / 20)}
+          onPageChange={setCurrentPage}
+        />
+      )}
       {isFormOpen && (
         <EnquiryForm
+          enquiry={selectedEnquiry}
           onSubmit={handleSubmit}
-          onCancel={() => setIsFormOpen(false)}
+          onCancel={() => { setIsFormOpen(false); setSelectedEnquiry(null); }}
         />
       )}
       <Toaster />

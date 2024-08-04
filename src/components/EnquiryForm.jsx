@@ -40,10 +40,10 @@ const formSchema = z.object({
   remarks: z.string().optional(),
 });
 
-const EnquiryForm = ({ onSubmit, onCancel }) => {
+const EnquiryForm = ({ enquiry, onSubmit, onCancel }) => {
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: enquiry || {
       enquiry_id: "",
       channel: "",
       enquiry_mode: "",
@@ -74,25 +74,35 @@ const EnquiryForm = ({ onSubmit, onCancel }) => {
   });
 
   const handleSubmit = (data) => {
-    // Add system fields
-    const enquiryData = {
-      ...data,
-      sno: Date.now(), // Use timestamp as a temporary serial number
-      created_by: "Current User", // Replace with actual user info
-      created_date: new Date().toISOString().split('T')[0],
-      updated_by: "Current User", // Replace with actual user info
-      updated_date: new Date().toISOString().split('T')[0],
-      is_assigned: false,
-      is_deleted: false,
-    };
-    onSubmit(enquiryData);
+    if (!enquiry) {
+      // Add system fields for new enquiries
+      const enquiryData = {
+        ...data,
+        sno: Date.now(), // Use timestamp as a temporary serial number
+        created_by: "Current User", // Replace with actual user info
+        created_date: new Date().toISOString().split('T')[0],
+        updated_by: "Current User", // Replace with actual user info
+        updated_date: new Date().toISOString().split('T')[0],
+        is_assigned: false,
+        is_deleted: false,
+      };
+      onSubmit(enquiryData);
+    } else {
+      // For updates, only change the updated_by and updated_date
+      const updatedData = {
+        ...data,
+        updated_by: "Current User", // Replace with actual user info
+        updated_date: new Date().toISOString().split('T')[0],
+      };
+      onSubmit(updatedData);
+    }
   };
 
   return (
     <Dialog open={true} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>Create New Enquiry</DialogTitle>
+          <DialogTitle>{enquiry ? "Update Enquiry" : "Create New Enquiry"}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[80vh] overflow-y-auto">
           <Form {...form}>
