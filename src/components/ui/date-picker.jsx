@@ -24,7 +24,7 @@ export function DatePickerDemo() {
             !date && "text-muted-foreground"
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIconLucide className="mr-2 h-4 w-4" />
           {date ? format(date, "PPP") : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
@@ -41,7 +41,7 @@ export function DatePickerDemo() {
 }
 "use client"
 
-import { Calendar as CalendarIcon } from "lucide-react"
+import { Calendar as CalendarIconLucide } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
