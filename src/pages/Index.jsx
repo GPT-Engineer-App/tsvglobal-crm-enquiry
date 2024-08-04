@@ -109,7 +109,8 @@ const Index = () => {
       await addSavedSearchMutation.mutateAsync({ 
         name, 
         criteria: searchCriteria,
-        application_name: 'Enquiry' // Add this line
+        user_id: user.id,
+        application_name: 'Enquiry'
       });
       toast.success("Search saved successfully!");
       setSavedSearches([...savedSearches, { name, criteria: searchCriteria }]);
@@ -133,7 +134,7 @@ const Index = () => {
         savedSearches={savedSearches}
         onSaveSearch={handleSaveSearch}
       />
-      <Button onClick={() => { setSelectedEnquiry(null); setIsFormOpen(true); }}>New Enquiry</Button>
+      <Button onClick={() => { setSelectedEnquiry(null); setIsFormOpen(true); }} className="mb-4">New Enquiry</Button>
       {isLoading ? (
         <p>Loading enquiries...</p>
       ) : isError ? (
