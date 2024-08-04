@@ -8,7 +8,9 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "git:init": "git init && git add . && git commit -m 'Initial commit'",
+    "git:push": "git push -u origin main"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
