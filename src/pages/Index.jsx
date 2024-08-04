@@ -9,6 +9,8 @@ import EnquiryList from '@/components/EnquiryList';
 import QuoteOfTheDay from '@/components/QuoteOfTheDay';
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const Index = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
