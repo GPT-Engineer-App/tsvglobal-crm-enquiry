@@ -9,6 +9,12 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const queryClient = new QueryClient();
 
+export const SupabaseProvider = ({ children }) => (
+  <QueryClientProvider client={queryClient}>
+    {children}
+  </QueryClientProvider>
+);
+
 export const useSupabaseSession = () => {
     const [session, setSession] = useState(null);
 
