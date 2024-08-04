@@ -14,25 +14,16 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const { data, error } = await supabase
-        .from('user_table')
-        .select('*')
-        .eq('user_id', email)
-        .eq('password', password)
-        .single();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
 
       if (error) throw error;
 
-      if (data && data.application_name) {
-        const applicationNames = Array.isArray(data.application_name) ? data.application_name : [data.application_name];
-        if (applicationNames.includes('Enquiry')) {
-          // Store user info in localStorage or context
-          localStorage.setItem('user', JSON.stringify(data));
-          toast.success("Login successful!");
-          navigate('/');
-        } else {
-          toast.error("You don't have access to this application.");
-        }
+      if (data.user) {
+        toast.success("Login successful!");
+        navigate('/');
       } else {
         toast.error("Invalid user data.");
       }

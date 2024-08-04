@@ -1,15 +1,57 @@
 import { createClient } from '@supabase/supabase-js';
 import { useQuery, useMutation, useQueryClient, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { useState, useEffect } from "react";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_PROJECT_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_API_KEY;
+
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-import React from "react";
 export const queryClient = new QueryClient();
+
 export function SupabaseProvider({ children }) {
-    return React.createElement(QueryClientProvider, { client: queryClient }, children);
+    const [session, setSession] = useState(null);
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+        });
+
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    return (
+        <QueryClientProvider client={queryClient}>
+            {children}
+        </QueryClientProvider>
+    );
 }
+
+export const useSupabaseSession = () => {
+    const [session, setSession] = useState(null);
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+        });
+
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    return session;
+};
 
 const fromSupabase = async (query) => {
     const { data, error } = await query;
@@ -224,58 +266,78 @@ export const useDeleteDsrTracker = () => {
 };
 
 // Enquiry Hooks
-export const useEnquiries = () => useQuery({
-    queryKey: ['enquiries'],
-    queryFn: () => fromSupabase(supabase.from('enquiry').select('*'))
-});
+export const useEnquiries = () => {
+    const session = useSupabaseSession();
+    return useQuery({
+        queryKey: ['enquiries'],
+        queryFn: () => fromSupabase(supabase.from('enquiry').select('*')),
+        enabled: !!session
+    });
+};
 
-export const useEnquiry = (id) => useQuery({
-    queryKey: ['enquiries', id],
-    queryFn: () => fromSupabase(supabase.from('enquiry').select('*').eq('id', id).single())
-});
+export const useEnquiry = (id) => {
+    const session = useSupabaseSession();
+    return useQuery({
+        queryKey: ['enquiries', id],
+        queryFn: () => fromSupabase(supabase.from('enquiry').select('*').eq('id', id).single()),
+        enabled: !!session
+    });
+};
 
 export const useAddEnquiry = () => {
     const queryClient = useQueryClient();
+    const session = useSupabaseSession();
     return useMutation({
         mutationFn: (newEnquiry) => fromSupabase(supabase.from('enquiry').insert([newEnquiry])),
         onSuccess: () => {
             queryClient.invalidateQueries('enquiries');
         },
+        enabled: !!session
     });
 };
 
 export const useUpdateEnquiry = () => {
     const queryClient = useQueryClient();
+    const session = useSupabaseSession();
     return useMutation({
         mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('enquiry').update(updateData).eq('id', id)),
         onSuccess: () => {
             queryClient.invalidateQueries('enquiries');
         },
+        enabled: !!session
     });
 };
 
 export const useDeleteEnquiry = () => {
     const queryClient = useQueryClient();
+    const session = useSupabaseSession();
     return useMutation({
         mutationFn: (id) => fromSupabase(supabase.from('enquiry').delete().eq('id', id)),
         onSuccess: () => {
             queryClient.invalidateQueries('enquiries');
         },
+        enabled: !!session
     });
 };
 
 // Saved Searches Hooks
-export const useSavedSearches = () => useQuery({
-    queryKey: ['savedSearches'],
-    queryFn: () => fromSupabase(supabase.from('saved_search_enquiry').select('*'))
-});
+export const useSavedSearches = () => {
+    const session = useSupabaseSession();
+    return useQuery({
+        queryKey: ['savedSearches'],
+        queryFn: () => fromSupabase(supabase.from('saved_search_enquiry').select('*')),
+        enabled: !!session
+    });
+};
 
 export const useAddSavedSearch = () => {
     const queryClient = useQueryClient();
+    const session = useSupabaseSession();
     return useMutation({
         mutationFn: (newSavedSearch) => fromSupabase(supabase.from('saved_search_enquiry').insert([newSavedSearch])),
         onSuccess: () => {
             queryClient.invalidateQueries('savedSearches');
         },
+        enabled: !!session
     });
 };
