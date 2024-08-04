@@ -23,13 +23,18 @@ const Login = () => {
 
       if (error) throw error;
 
-      if (data && data.user_type && data.user_type.includes('Enquiry')) {
-        // Store user info in localStorage or context
-        localStorage.setItem('user', JSON.stringify(data));
-        toast.success("Login successful!");
-        navigate('/');
+      if (data && data.user_type) {
+        const userTypes = Array.isArray(data.user_type) ? data.user_type : [data.user_type];
+        if (userTypes.includes('Enquiry')) {
+          // Store user info in localStorage or context
+          localStorage.setItem('user', JSON.stringify(data));
+          toast.success("Login successful!");
+          navigate('/');
+        } else {
+          toast.error("You don't have access to this application.");
+        }
       } else {
-        toast.error("You don't have access to this application.");
+        toast.error("Invalid user data.");
       }
     } catch (error) {
       toast.error("Login failed. Please check your credentials.");
