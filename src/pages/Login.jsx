@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase";
 
 const Login = () => {
-  const [userId, setUserId] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
@@ -17,13 +17,13 @@ const Login = () => {
       const { data, error } = await supabase
         .from('user_table')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', email)
         .eq('password', password)
         .single();
 
       if (error) throw error;
 
-      if (data && data.application_name && data.application_name.includes('Enquiry')) {
+      if (data && data.user_type && data.user_type.includes('Enquiry')) {
         // Store user info in localStorage or context
         localStorage.setItem('user', JSON.stringify(data));
         toast.success("Login successful!");
@@ -47,10 +47,10 @@ const Login = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Input
-                type="text"
-                placeholder="User ID"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
