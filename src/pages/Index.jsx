@@ -167,9 +167,13 @@ const Index = () => {
         toast.success("Search updated successfully!");
         setSavedSearches(searches => searches.map(s => s.id === id ? { ...searchToSave, id } : s));
       } else {
-        const { data } = await addSavedSearchMutation.mutateAsync(searchToSave);
-        toast.success("Search saved successfully!");
-        setSavedSearches([...savedSearches, { ...searchToSave, id: data[0].id }]);
+        const result = await addSavedSearchMutation.mutateAsync(searchToSave);
+        if (result && result.data && result.data[0]) {
+          toast.success("Search saved successfully!");
+          setSavedSearches([...savedSearches, { ...searchToSave, id: result.data[0].id }]);
+        } else {
+          throw new Error("Failed to save search: No data returned");
+        }
       }
     } catch (error) {
       toast.error(`Failed to ${id ? 'update' : 'save'} search. Please try again.`);
