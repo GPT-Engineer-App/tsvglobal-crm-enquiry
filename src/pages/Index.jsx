@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { useAddEnquiry, useEnquiries, useUpdateEnquiry, useDeleteEnquiry, useSavedSearches, useAddSavedSearch } from "@/integrations/supabase";
+import { useAddEnquiry, useEnquiries, useUpdateEnquiry, useDeleteEnquiry, useSavedSearches, useAddSavedSearch, useUpdateSavedSearch, useDeleteSavedSearch } from "@/integrations/supabase";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import EnquiryForm from '@/components/EnquiryForm';
@@ -21,6 +21,8 @@ const Index = () => {
   const [savedSearches, setSavedSearches] = useState([]);
   const { data: savedSearchesData } = useSavedSearches();
   const addSavedSearchMutation = useAddSavedSearch();
+  const updateSavedSearchMutation = useUpdateSavedSearch();
+  const deleteSavedSearchMutation = useDeleteSavedSearch();
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const addEnquiryMutation = useAddEnquiry();
   const updateEnquiryMutation = useUpdateEnquiry();
@@ -89,9 +91,11 @@ const Index = () => {
 
   useEffect(() => {
     if (savedSearchesData) {
-      setSavedSearches(savedSearchesData);
+      // Filter saved searches for the current user
+      const userSavedSearches = savedSearchesData.filter(search => search.user_id === user.user_id);
+      setSavedSearches(userSavedSearches);
     }
-  }, [savedSearchesData]);
+  }, [savedSearchesData, user]);
 
   const filteredEnquiries = enquiries?.filter(enquiry => {
     return searchCriteria.every(criterion => {
@@ -129,10 +133,38 @@ const Index = () => {
       };
       await addSavedSearchMutation.mutateAsync(searchToSave);
       toast.success("Search saved successfully!");
-      setSavedSearches([...savedSearches, { name, criteria: searchCriteria }]);
+      setSavedSearches([...savedSearches, { ...searchToSave, criteria: searchCriteria }]);
     } catch (error) {
       toast.error("Failed to save search. Please try again.");
       console.error("Error saving search:", error);
+    }
+  };
+
+  const handleEditSearch = async (savedSearch) => {
+    const newName = prompt("Enter new name for the search:", savedSearch.name);
+    if (newName) {
+      try {
+        const updatedSearch = { ...savedSearch, name: newName };
+        await updateSavedSearchMutation.mutateAsync({ id: savedSearch.id, ...updatedSearch });
+        toast.success("Search updated successfully!");
+        setSavedSearches(searches => searches.map(s => s.id === savedSearch.id ? updatedSearch : s));
+      } catch (error) {
+        toast.error("Failed to update search. Please try again.");
+        console.error("Error updating search:", error);
+      }
+    }
+  };
+
+  const handleDeleteSearch = async (savedSearch) => {
+    if (window.confirm("Are you sure you want to delete this saved search?")) {
+      try {
+        await deleteSavedSearchMutation.mutateAsync(savedSearch.id);
+        toast.success("Search deleted successfully!");
+        setSavedSearches(searches => searches.filter(s => s.id !== savedSearch.id));
+      } catch (error) {
+        toast.error("Failed to delete search. Please try again.");
+        console.error("Error deleting search:", error);
+      }
     }
   };
 
@@ -162,6 +194,8 @@ const Index = () => {
           onSearch={setSearchCriteria}
           savedSearches={savedSearches}
           onSaveSearch={handleSaveSearch}
+          onEditSearch={handleEditSearch}
+          onDeleteSearch={handleDeleteSearch}
         />
         <Button onClick={() => { setSelectedEnquiry(null); setIsFormOpen(true); }} className="mb-4">New Enquiry</Button>
         {isLoading ? (

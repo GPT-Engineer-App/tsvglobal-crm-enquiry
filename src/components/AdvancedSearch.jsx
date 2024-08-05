@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X } from 'lucide-react';
+import { X, Edit, Trash2 } from 'lucide-react';
 
 const fields = [
   { name: 'enquiry_id', type: 'text' },
@@ -45,7 +45,7 @@ const operators = [
   { value: 'lessThan', label: 'Less than' },
 ];
 
-const AdvancedSearch = ({ onSearch, savedSearches, onSaveSearch }) => {
+const AdvancedSearch = ({ onSearch, savedSearches, onSaveSearch, onEditSearch, onDeleteSearch }) => {
   const [criteria, setCriteria] = useState([]);
   const [searchName, setSearchName] = useState('');
 
@@ -81,6 +81,14 @@ const AdvancedSearch = ({ onSearch, savedSearches, onSaveSearch }) => {
   const loadSavedSearch = (savedSearch) => {
     const parsedCriteria = JSON.parse(savedSearch.criteria);
     setCriteria(parsedCriteria);
+  };
+
+  const handleEditSearch = (savedSearch) => {
+    onEditSearch(savedSearch);
+  };
+
+  const handleDeleteSearch = (savedSearch) => {
+    onDeleteSearch(savedSearch);
   };
 
   return (
@@ -173,9 +181,17 @@ const AdvancedSearch = ({ onSearch, savedSearches, onSaveSearch }) => {
             <h3 className="font-semibold mb-2">Saved Searches</h3>
             <div className="flex flex-wrap gap-2">
               {savedSearches.map((savedSearch, index) => (
-                <Button key={index} variant="outline" onClick={() => loadSavedSearch(savedSearch)}>
-                  {savedSearch.name}
-                </Button>
+                <div key={index} className="flex items-center space-x-2">
+                  <Button variant="outline" onClick={() => loadSavedSearch(savedSearch)}>
+                    {savedSearch.name}
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleEditSearch(savedSearch)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDeleteSearch(savedSearch)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               ))}
             </div>
           </div>
