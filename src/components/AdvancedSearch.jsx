@@ -79,7 +79,8 @@ const AdvancedSearch = ({ onSearch, savedSearches, onSaveSearch }) => {
   };
 
   const loadSavedSearch = (savedSearch) => {
-    setCriteria(savedSearch.criteria);
+    const parsedCriteria = JSON.parse(savedSearch.criteria);
+    setCriteria(parsedCriteria);
   };
 
   return (

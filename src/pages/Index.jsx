@@ -121,12 +121,13 @@ const Index = () => {
 
   const handleSaveSearch = async (name) => {
     try {
-      await addSavedSearchMutation.mutateAsync({ 
+      const searchToSave = { 
         name, 
         criteria: JSON.stringify(searchCriteria),
-        user_id: user.user_id, // Change this line
+        user_id: user.user_id,
         application_name: 'Enquiry'
-      });
+      };
+      await addSavedSearchMutation.mutateAsync(searchToSave);
       toast.success("Search saved successfully!");
       setSavedSearches([...savedSearches, { name, criteria: searchCriteria }]);
     } catch (error) {
