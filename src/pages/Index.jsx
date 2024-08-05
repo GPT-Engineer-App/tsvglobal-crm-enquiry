@@ -91,7 +91,7 @@ const Index = () => {
   }, [theme]);
 
   useEffect(() => {
-    if (savedSearchesData) {
+    if (savedSearchesData && user) {
       // Filter saved searches for the current user
       const userSavedSearches = savedSearchesData.filter(search => search.user_id === user.user_id);
       setSavedSearches(userSavedSearches);
@@ -151,6 +151,10 @@ const Index = () => {
   };
 
   const handleSaveSearch = async (name) => {
+    if (!user) {
+      toast.error("You must be logged in to save a search.");
+      return;
+    }
     try {
       const searchToSave = { 
         name, 
