@@ -24,7 +24,13 @@ const Login = () => {
       if (error) throw error;
 
       if (data && data.password === password) {
-        localStorage.setItem('user', JSON.stringify(data));
+        const userData = {
+          user_id: data.user_id,
+          email: data.email,
+          user_type: data.user_type,
+          user_org: data.user_org
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
         toast.success("Login successful!");
         navigate('/');
       } else {
