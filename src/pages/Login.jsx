@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase";
 import Logo from '@/components/Logo';
 
 const Login = () => {
-  const [userId, setUserId] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
@@ -18,7 +18,7 @@ const Login = () => {
       const { data, error } = await supabase
         .from('user_table')
         .select('*')
-        .eq('user_id', userId)
+        .eq('email', email)
         .single();
 
       if (error) throw error;
@@ -44,10 +44,10 @@ const Login = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Input
-                type="text"
-                placeholder="User ID"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
