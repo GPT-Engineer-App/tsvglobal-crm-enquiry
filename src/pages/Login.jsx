@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase";
+import Logo from '@/components/Logo';
 
 const Login = () => {
   const [userId, setUserId] = useState('');
@@ -38,10 +39,8 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Login to Enquiry System</CardTitle>
-        </CardHeader>
         <CardContent>
+          <Logo />
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Input

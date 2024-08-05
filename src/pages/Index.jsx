@@ -10,6 +10,7 @@ import QuoteOfTheDay from '@/components/QuoteOfTheDay';
 import AdvancedSearch from '@/components/AdvancedSearch';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useTheme } from 'next-themes';
+import Logo from '@/components/Logo';
 
 const Index = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -133,13 +134,15 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Enquiries</h1>
-        <div className="flex items-center space-x-4">
-          <Button onClick={toggleTheme} variant="outline">
-            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-          </Button>
-          <Button onClick={handleLogout} variant="secondary">Logout</Button>
+      <header className="bg-primary text-primary-foreground py-4 px-6">
+        <div className="container mx-auto flex justify-between items-center">
+          <Logo />
+          <div className="flex items-center space-x-4">
+            <Button onClick={toggleTheme} variant="outline">
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </Button>
+            <Button onClick={handleLogout} variant="secondary">Logout</Button>
+          </div>
         </div>
       </header>
       <main className="flex-grow container mx-auto p-4">
