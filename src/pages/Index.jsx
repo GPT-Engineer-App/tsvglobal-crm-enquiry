@@ -123,12 +123,13 @@ const Index = () => {
   if (!user) return null;
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
+    <div className="flex flex-col min-h-screen">
+      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Enquiries</h1>
-        <Button onClick={handleLogout} variant="outline">Logout</Button>
-      </div>
-      <QuoteOfTheDay />
+        <Button onClick={handleLogout} variant="secondary">Logout</Button>
+      </header>
+      <main className="flex-grow container mx-auto p-4">
+        <QuoteOfTheDay />
       <AdvancedSearch
         onSearch={setSearchCriteria}
         savedSearches={savedSearches}
@@ -156,7 +157,8 @@ const Index = () => {
           onCancel={() => { setIsFormOpen(false); setSelectedEnquiry(null); }}
         />
       )}
-      <Toaster />
+        <Toaster />
+      </main>
     </div>
   );
 };
