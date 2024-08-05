@@ -342,13 +342,3 @@ export const useDeleteSavedSearch = () => {
         },
     });
 };
-
-export const useUpdateSavedSearch = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('saved_search_enquiry').update(updateData).eq('id', id)),
-        onSuccess: () => {
-            queryClient.invalidateQueries('saved_searches');
-        },
-    });
-};
