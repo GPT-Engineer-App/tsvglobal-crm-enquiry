@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase";
 import Logo from '@/components/Logo';
 
@@ -11,6 +11,7 @@ const Login = () => {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -30,13 +31,25 @@ const Login = () => {
           user_org: data.user_org
         };
         localStorage.setItem('user', JSON.stringify(userData));
-        toast.success("Login successful!");
+        toast({
+          title: "Success",
+          description: "Login successful!",
+          variant: "success",
+        });
         navigate('/');
       } else {
-        toast.error("Invalid credentials.");
+        toast({
+          title: "Error",
+          description: "Invalid credentials.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      toast.error("Login failed. Please check your credentials.");
+      toast({
+        title: "Error",
+        description: "Login failed. Please check your credentials.",
+        variant: "destructive",
+      });
       console.error("Login error:", error);
     }
   };

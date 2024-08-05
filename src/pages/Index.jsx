@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAddEnquiry, useEnquiries, useUpdateEnquiry, useDeleteEnquiry, useSavedSearches, useAddSavedSearch, useUpdateSavedSearch, useDeleteSavedSearch } from "@/integrations/supabase";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import EnquiryForm from '@/components/EnquiryForm';
 import EnquiryList from '@/components/EnquiryList';
 import QuoteOfTheDay from '@/components/QuoteOfTheDay';
@@ -41,19 +42,33 @@ const Index = () => {
     }
   }, [navigate]);
 
+  const { toast } = useToast();
+
   const handleSubmit = async (data) => {
     try {
       if (selectedEnquiry) {
         await updateEnquiryMutation.mutateAsync({ id: selectedEnquiry.id, ...data });
-        toast.success("Enquiry updated successfully!");
+        toast({
+          title: "Success",
+          description: "Enquiry updated successfully!",
+          variant: "success",
+        });
       } else {
         await addEnquiryMutation.mutateAsync(data);
-        toast.success("Enquiry created successfully!");
+        toast({
+          title: "Success",
+          description: "Enquiry created successfully!",
+          variant: "success",
+        });
       }
       setIsFormOpen(false);
       setSelectedEnquiry(null);
     } catch (error) {
-      toast.error(`Failed to ${selectedEnquiry ? 'update' : 'create'} enquiry. Please try again.`);
+      toast({
+        title: "Error",
+        description: `Failed to ${selectedEnquiry ? 'update' : 'create'} enquiry. Please try again.`,
+        variant: "destructive",
+      });
       console.error(`Error ${selectedEnquiry ? 'updating' : 'creating'} enquiry:`, error);
     }
   };
@@ -223,6 +238,7 @@ const Index = () => {
           <h1 className="text-3xl font-bold mt-4">Welcome to Enquiry Application</h1>
           <p className="text-lg text-muted-foreground">Streamline your logistics operations</p>
         </div>
+        <Toaster />
         <QuoteOfTheDay />
         <AdvancedSearch
           onSearch={setSearchCriteria}
@@ -273,7 +289,6 @@ const Index = () => {
           onCancel={() => { setIsFormOpen(false); setSelectedEnquiry(null); }}
         />
       )}
-        <Toaster />
       </main>
     </div>
   );
