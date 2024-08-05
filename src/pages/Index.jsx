@@ -8,6 +8,8 @@ import EnquiryForm from '@/components/EnquiryForm';
 import EnquiryList from '@/components/EnquiryList';
 import QuoteOfTheDay from '@/components/QuoteOfTheDay';
 import AdvancedSearch from '@/components/AdvancedSearch';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { useTheme } from 'next-themes';
 
 const Index = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -23,6 +25,7 @@ const Index = () => {
   const deleteEnquiryMutation = useDeleteEnquiry();
   const { data: enquiries, isLoading, isError } = useEnquiries();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
@@ -68,8 +71,14 @@ const Index = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login');
+    if (window.confirm("Are you sure you want to log out?")) {
+      localStorage.removeItem('user');
+      navigate('/login');
+    }
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   useEffect(() => {
@@ -126,30 +135,52 @@ const Index = () => {
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Enquiries</h1>
-        <Button onClick={handleLogout} variant="secondary">Logout</Button>
+        <div className="flex items-center space-x-4">
+          <Button onClick={toggleTheme} variant="outline">
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          </Button>
+          <Button onClick={handleLogout} variant="secondary">Logout</Button>
+        </div>
       </header>
       <main className="flex-grow container mx-auto p-4">
         <QuoteOfTheDay />
-      <AdvancedSearch
-        onSearch={setSearchCriteria}
-        savedSearches={savedSearches}
-        onSaveSearch={handleSaveSearch}
-      />
-      <Button onClick={() => { setSelectedEnquiry(null); setIsFormOpen(true); }} className="mb-4">New Enquiry</Button>
-      {isLoading ? (
-        <p>Loading enquiries...</p>
-      ) : isError ? (
-        <p>Error loading enquiries. Please try again.</p>
-      ) : (
-        <EnquiryList
-          enquiries={paginatedEnquiries}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          currentPage={currentPage}
-          totalPages={Math.ceil(filteredEnquiries.length / 20)}
-          onPageChange={setCurrentPage}
+        <AdvancedSearch
+          onSearch={setSearchCriteria}
+          savedSearches={savedSearches}
+          onSaveSearch={handleSaveSearch}
         />
-      )}
+        <Button onClick={() => { setSelectedEnquiry(null); setIsFormOpen(true); }} className="mb-4">New Enquiry</Button>
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : isError ? (
+          <p className="text-red-500">Error loading enquiries. Please try again.</p>
+        ) : (
+          <>
+            <EnquiryList
+              enquiries={paginatedEnquiries}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredEnquiries.length / 20)}
+              onPageChange={setCurrentPage}
+            />
+            <div className="mt-4 flex justify-center items-center space-x-2">
+              <Button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <span>Page {currentPage} of {Math.ceil(filteredEnquiries.length / 20)}</span>
+              <Button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredEnquiries.length / 20)))}
+                disabled={currentPage === Math.ceil(filteredEnquiries.length / 20)}
+              >
+                Next
+              </Button>
+            </div>
+          </>
+        )}
       {isFormOpen && (
         <EnquiryForm
           enquiry={selectedEnquiry}
