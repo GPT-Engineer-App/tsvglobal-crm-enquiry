@@ -11,6 +11,7 @@ import AdvancedSearch from '@/components/AdvancedSearch';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useTheme } from 'next-themes';
 import Logo from '@/components/Logo';
+import { Moon, Sun } from 'lucide-react';
 
 const Index = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -83,6 +84,10 @@ const Index = () => {
   };
 
   useEffect(() => {
+    document.body.className = theme;
+  }, [theme]);
+
+  useEffect(() => {
     if (savedSearchesData) {
       setSavedSearches(savedSearchesData);
     }
@@ -136,16 +141,21 @@ const Index = () => {
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary text-primary-foreground py-4 px-6">
         <div className="container mx-auto flex justify-between items-center">
-          <Logo />
+          <div className="flex-1"></div>
           <div className="flex items-center space-x-4">
-            <Button onClick={toggleTheme} variant="outline">
-              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            <Button onClick={toggleTheme} variant="ghost" size="icon">
+              {theme === 'dark' ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
             </Button>
             <Button onClick={handleLogout} variant="secondary">Logout</Button>
           </div>
         </div>
       </header>
       <main className="flex-grow container mx-auto p-4">
+        <div className="text-center mb-8">
+          <Logo />
+          <h1 className="text-3xl font-bold mt-4">Welcome to Enquiry Application</h1>
+          <p className="text-lg text-muted-foreground">Streamline your logistics operations</p>
+        </div>
         <QuoteOfTheDay />
         <AdvancedSearch
           onSearch={setSearchCriteria}
