@@ -1,38 +1,31 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Edit, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-const EnquiryList = ({ enquiries, onEdit, onDelete, currentPage, totalPages, onPageChange }) => {
+const EnquiryList = ({ enquiries, onEdit, onDelete, currentPage, totalPages, onPageChange, onSort, sortConfig }) => {
   return (
     <div className="relative">
       <ScrollArea className="h-[600px] w-full overflow-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Enquiry ID</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>Channel</TableHead>
-              <TableHead>Enquiry Mode</TableHead>
-              <TableHead>Enquiry Type</TableHead>
-              <TableHead>Enquiry Subtype</TableHead>
-              <TableHead>Incoterms</TableHead>
-              <TableHead>Origin</TableHead>
-              <TableHead>Destination</TableHead>
-              <TableHead>Dimensions (L x B x H)</TableHead>
-              <TableHead>Unit of Measurement</TableHead>
-              <TableHead>Package Type</TableHead>
-              <TableHead>No. of Packages</TableHead>
-              <TableHead>Net Weight</TableHead>
-              <TableHead>Gross Weight</TableHead>
-              <TableHead>Equipment</TableHead>
-              <TableHead>No. of Units</TableHead>
-              <TableHead>Commodity</TableHead>
-              <TableHead>Cargo Readiness</TableHead>
-              <TableHead>Cut-off ETA</TableHead>
-              <TableHead>Indication in USD</TableHead>
-              <TableHead>Remarks</TableHead>
-              <TableHead>Created Date</TableHead>
+              {[
+                "Enquiry ID", "Client", "Channel", "Enquiry Mode", "Enquiry Type", "Enquiry Subtype",
+                "Incoterms", "Origin", "Destination", "Dimensions (L x B x H)", "Unit of Measurement",
+                "Package Type", "No. of Packages", "Net Weight", "Gross Weight", "Equipment",
+                "No. of Units", "Commodity", "Cargo Readiness", "Cut-off ETA", "Indication in USD",
+                "Remarks", "Created Date"
+              ].map((header) => (
+                <TableHead key={header} onClick={() => onSort(header.toLowerCase().replace(/ /g, '_'))}>
+                  <div className="flex items-center cursor-pointer">
+                    {header}
+                    {sortConfig.key === header.toLowerCase().replace(/ /g, '_') && (
+                      sortConfig.direction === 'ascending' ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />
+                    )}
+                  </div>
+                </TableHead>
+              ))}
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>

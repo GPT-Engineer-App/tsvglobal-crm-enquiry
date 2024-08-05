@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useAddEnquiry, useEnquiries, useUpdateEnquiry, useDeleteEnquiry, useSavedSearches, useAddSavedSearch, useUpdateSavedSearch, useDeleteSavedSearch } from "@/integrations/supabase";
@@ -19,6 +19,7 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchCriteria, setSearchCriteria] = useState([]);
   const [savedSearches, setSavedSearches] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   const { data: savedSearchesData } = useSavedSearches();
   const addSavedSearchMutation = useAddSavedSearch();
   const updateSavedSearchMutation = useUpdateSavedSearch();
@@ -97,31 +98,57 @@ const Index = () => {
     }
   }, [savedSearchesData, user]);
 
-  const filteredEnquiries = enquiries?.filter(enquiry => {
-    return searchCriteria.every(criterion => {
-      const { field, operator, value } = criterion;
-      const enquiryValue = enquiry[field];
+  const filteredEnquiries = useMemo(() => {
+    let result = enquiries?.filter(enquiry => {
+      return searchCriteria.every(criterion => {
+        const { field, operator, value } = criterion;
+        const enquiryValue = enquiry[field];
 
-      switch (operator) {
-        case 'equals':
-          return enquiryValue === value;
-        case 'contains':
-          return String(enquiryValue).toLowerCase().includes(String(value).toLowerCase());
-        case 'startsWith':
-          return String(enquiryValue).toLowerCase().startsWith(String(value).toLowerCase());
-        case 'endsWith':
-          return String(enquiryValue).toLowerCase().endsWith(String(value).toLowerCase());
-        case 'greaterThan':
-          return enquiryValue > value;
-        case 'lessThan':
-          return enquiryValue < value;
-        default:
-          return true;
-      }
-    });
-  }) || [];
+        switch (operator) {
+          case 'equals':
+            return enquiryValue === value;
+          case 'contains':
+            return String(enquiryValue).toLowerCase().includes(String(value).toLowerCase());
+          case 'startsWith':
+            return String(enquiryValue).toLowerCase().startsWith(String(value).toLowerCase());
+          case 'endsWith':
+            return String(enquiryValue).toLowerCase().endsWith(String(value).toLowerCase());
+          case 'greaterThan':
+            return enquiryValue > value;
+          case 'lessThan':
+            return enquiryValue < value;
+          default:
+            return true;
+        }
+      });
+    }) || [];
+
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return result;
+  }, [enquiries, searchCriteria, sortConfig]);
 
   const paginatedEnquiries = filteredEnquiries.slice((currentPage - 1) * 20, currentPage * 20);
+
+  const handleSort = (key) => {
+    setSortConfig((prevConfig) => ({
+      key,
+      direction:
+        prevConfig.key === key && prevConfig.direction === 'ascending'
+          ? 'descending'
+          : 'ascending',
+    }));
+  };
 
   const handleSaveSearch = async (name) => {
     try {
@@ -211,6 +238,8 @@ const Index = () => {
               currentPage={currentPage}
               totalPages={Math.ceil(filteredEnquiries.length / 20)}
               onPageChange={setCurrentPage}
+              onSort={handleSort}
+              sortConfig={sortConfig}
             />
             <div className="mt-4 flex justify-center items-center space-x-2">
               <Button
