@@ -150,7 +150,7 @@ const Index = () => {
     }));
   };
 
-  const handleSaveSearch = async (name) => {
+  const handleSaveSearch = async (name, criteria, id = null) => {
     if (!user) {
       toast.error("You must be logged in to save a search.");
       return;
@@ -158,32 +158,31 @@ const Index = () => {
     try {
       const searchToSave = { 
         name, 
-        criteria: JSON.stringify(searchCriteria),
+        criteria: JSON.stringify(criteria),
         user_id: user.user_id,
         application_name: 'Enquiry'
       };
-      await addSavedSearchMutation.mutateAsync(searchToSave);
-      toast.success("Search saved successfully!");
-      setSavedSearches([...savedSearches, { ...searchToSave, criteria: searchCriteria }]);
+      if (id) {
+        await updateSavedSearchMutation.mutateAsync({ id, ...searchToSave });
+        toast.success("Search updated successfully!");
+        setSavedSearches(searches => searches.map(s => s.id === id ? { ...searchToSave, id } : s));
+      } else {
+        const { data } = await addSavedSearchMutation.mutateAsync(searchToSave);
+        toast.success("Search saved successfully!");
+        setSavedSearches([...savedSearches, { ...searchToSave, id: data[0].id }]);
+      }
     } catch (error) {
-      toast.error("Failed to save search. Please try again.");
-      console.error("Error saving search:", error);
+      toast.error(`Failed to ${id ? 'update' : 'save'} search. Please try again.`);
+      console.error(`Error ${id ? 'updating' : 'saving'} search:`, error);
     }
   };
 
-  const handleEditSearch = async (savedSearch) => {
-    const newName = prompt("Enter new name for the search:", savedSearch.name);
-    if (newName) {
-      try {
-        const updatedSearch = { ...savedSearch, name: newName };
-        await updateSavedSearchMutation.mutateAsync({ id: savedSearch.id, ...updatedSearch });
-        toast.success("Search updated successfully!");
-        setSavedSearches(searches => searches.map(s => s.id === savedSearch.id ? updatedSearch : s));
-      } catch (error) {
-        toast.error("Failed to update search. Please try again.");
-        console.error("Error updating search:", error);
-      }
-    }
+  const handleEditSearch = (savedSearch) => {
+    setSearchCriteria(JSON.parse(savedSearch.criteria));
+  };
+
+  const handleLoadSearch = (criteria) => {
+    setSearchCriteria(criteria);
   };
 
   const handleDeleteSearch = async (savedSearch) => {
@@ -227,6 +226,7 @@ const Index = () => {
           onSaveSearch={handleSaveSearch}
           onEditSearch={handleEditSearch}
           onDeleteSearch={handleDeleteSearch}
+          onLoadSearch={handleLoadSearch}
         />
         <Button onClick={() => { setSelectedEnquiry(null); setIsFormOpen(true); }} className="mb-4">New Enquiry</Button>
         {isLoading ? (

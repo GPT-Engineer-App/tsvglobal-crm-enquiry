@@ -45,9 +45,10 @@ const operators = [
   { value: 'lessThan', label: 'Less than' },
 ];
 
-const AdvancedSearch = ({ onSearch, savedSearches, onSaveSearch, onEditSearch, onDeleteSearch }) => {
+const AdvancedSearch = ({ onSearch, savedSearches, onSaveSearch, onEditSearch, onDeleteSearch, onLoadSearch }) => {
   const [criteria, setCriteria] = useState([]);
   const [searchName, setSearchName] = useState('');
+  const [editingSearch, setEditingSearch] = useState(null);
 
   const addCriterion = () => {
     setCriteria([...criteria, { field: fields[0].name, operator: 'equals', value: '' }]);
@@ -71,7 +72,14 @@ const AdvancedSearch = ({ onSearch, savedSearches, onSaveSearch, onEditSearch, o
 
   const handleSaveSearch = () => {
     if (searchName) {
-      onSaveSearch(searchName);
+      if (editingSearch) {
+        if (window.confirm(`Are you sure you want to overwrite the saved search "${editingSearch.name}"?`)) {
+          onSaveSearch(searchName, criteria, editingSearch.id);
+          setEditingSearch(null);
+        }
+      } else {
+        onSaveSearch(searchName, criteria);
+      }
       setSearchName('');
     } else {
       alert('Please enter a name for your search');
@@ -81,14 +89,20 @@ const AdvancedSearch = ({ onSearch, savedSearches, onSaveSearch, onEditSearch, o
   const loadSavedSearch = (savedSearch) => {
     const parsedCriteria = JSON.parse(savedSearch.criteria);
     setCriteria(parsedCriteria);
+    onLoadSearch(parsedCriteria);
   };
 
   const handleEditSearch = (savedSearch) => {
-    onEditSearch(savedSearch);
+    setEditingSearch(savedSearch);
+    setSearchName(savedSearch.name);
+    const parsedCriteria = JSON.parse(savedSearch.criteria);
+    setCriteria(parsedCriteria);
   };
 
   const handleDeleteSearch = (savedSearch) => {
-    onDeleteSearch(savedSearch);
+    if (window.confirm(`Are you sure you want to delete the saved search "${savedSearch.name}"?`)) {
+      onDeleteSearch(savedSearch);
+    }
   };
 
   return (
@@ -185,8 +199,8 @@ const AdvancedSearch = ({ onSearch, savedSearches, onSaveSearch, onEditSearch, o
                   <Button variant="outline" onClick={() => loadSavedSearch(savedSearch)}>
                     {savedSearch.name}
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleEditSearch(savedSearch)}>
-                    <Edit className="h-4 w-4" />
+                  <Button variant="secondary" size="sm" onClick={() => handleEditSearch(savedSearch)}>
+                    Edit
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => handleDeleteSearch(savedSearch)}>
                     <Trash2 className="h-4 w-4" />
